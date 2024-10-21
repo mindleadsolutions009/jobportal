@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Filters</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Background image for the body */
+        body {
+            background-image: url('filter-image.jpg'); /* Replace with your image path */
+            background-size: cover; /* Ensure the image covers the entire background */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat; /* Prevent the background from repeating */
+            min-height: 100vh; /* Ensure the body is at least full viewport height */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container styles for form */
+        .container {
+            margin-top: 50px;
+            background-color: rgba(5, 6, 6, 0.9); /* Slight transparency for readability */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* No changes to navbar */
+    </style>
+</head>
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin-dashboard.html">Dashboard Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="manage-filters.html">Manage Filters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="find-jobs.html">Find Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post-job.html">Post Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-jobs.html">Manage Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin-login.html" onclick="handleLogout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center text-white">Manage Filter Options</h1> <!-- Text color changed to white -->
+    
+        <div class="card mt-3" style="background-color: #000; color: #fff;"> <!-- Black background and white text for the card -->
+            <div class="card-body">
+                <h5 class="text-white">Update Filter Options</h5> <!-- Text color changed to white -->
+                <form id="filterForm">
+                    <div class="mb-3">
+                        <label for="roles" class="form-label text-white">Roles</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="roles" placeholder="Comma separated roles (e.g., Customer Support,Technical Support)">
+                    </div>
+                    <div class="mb-3">
+                        <label for="companies" class="form-label text-white">Companies</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="companies" placeholder="Comma separated companies">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categories" class="form-label text-white">Categories</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="categories" placeholder="Comma separated categories">
+                    </div>
+                    <div class="mb-3">
+                        <label for="states" class="form-label text-white">States</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="states" placeholder="Comma separated states">
+                    </div>
+                    <div class="mb-3">
+                        <label for="locations" class="form-label text-white">Locations</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="locations" placeholder="Comma separated locations">
+                    </div>
+                    <div class="mb-3">
+                        <label for="experiences" class="form-label text-white">Experiences</label> <!-- Text color changed to white -->
+                        <input type="text" class="form-control" id="experiences" placeholder="Comma separated experiences (e.g., 0 to 0.5,0.5 to 1)">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Filters</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load existing filter options into the form
+        function loadFilterOptions() {
+            const filterOptions = JSON.parse(localStorage.getItem('filterOptions')) || {
+                roles: ['Customer Support', 'Technical Support'],
+                companies: ['Zomato', 'Globiva'],
+                categories: ['IT', 'Non IT', 'Others'],
+                states: ['Karnataka', 'Andhra Pradesh'],
+                locations: ['Bengaluru', 'Mysore'],
+                experiences: ['0 to 0.5', '0.5 to 1', '1 to 1.5']
+            };
+
+            document.getElementById('roles').value = filterOptions.roles.join(',');
+            document.getElementById('companies').value = filterOptions.companies.join(',');
+            document.getElementById('categories').value = filterOptions.categories.join(',');
+            document.getElementById('states').value = filterOptions.states.join(',');
+            document.getElementById('locations').value = filterOptions.locations.join(',');
+            document.getElementById('experiences').value = filterOptions.experiences.join(',');
+        }
+
+        // Save filter options to localStorage
+        function saveFilterOptions(event) {
+            event.preventDefault();
+
+            const roles = document.getElementById('roles').value.split(',').map(role => role.trim());
+            const companies = document.getElementById('companies').value.split(',').map(company => company.trim());
+            const categories = document.getElementById('categories').value.split(',').map(category => category.trim());
+            const states = document.getElementById('states').value.split(',').map(state => state.trim());
+            const locations = document.getElementById('locations').value.split(',').map(location => location.trim());
+            const experiences = document.getElementById('experiences').value.split(',').map(exp => exp.trim());
+
+            const updatedFilters = {
+                roles: roles,
+                companies: companies,
+                categories: categories,
+                states: states,
+                locations: locations,
+                experiences: experiences
+            };
+
+            localStorage.setItem('filterOptions', JSON.stringify(updatedFilters));
+            alert('Filters updated successfully!');
+        }
+
+        // Load filters on page load
+        window.onload = function () {
+            loadFilterOptions();
+        };
+
+        // Add event listener to save filter options
+        document.getElementById('filterForm').addEventListener('submit', saveFilterOptions);
+
+        // Handle Logout
+        function handleLogout() {
+            localStorage.removeItem('isAdmin');
+            alert('You have been logged out.');
+            window.location.href = 'admin-login.html';
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
