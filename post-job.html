@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Black background for the body */
+        body {
+            background-color: #000; /* Black background */
+            min-height: 100vh; /* Full viewport height */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Center the container in the middle of the page */
+        .container {
+            background-color: rgba(11, 7, 7, 0.1); /* Slightly transparent container */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+            max-width: 600px;
+            width: 100%; /* Ensures the form takes up full width on smaller screens */
+        }
+
+        /* Make the card background black and text white */
+        .card {
+            background-color: #000; /* Black background for the card */
+            color: #fff; /* White text */
+        }
+
+        /* Form input, textarea, and labels styling */
+        textarea, input, label, h1, .form-check-label {
+    color: #fff !important; /* Ensures all form labels, input, and text are white */
+}
+
+textarea, input {
+    background-color: #333; /* Darker background for inputs */
+    border: 1px solid #555; /* Border to match the dark theme */
+    color: #000 !important; /* Black color for input text */
+}
+        /* Adjust the color of buttons */
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
+    <script>
+        let currentEditingJobIndex = null;
+
+        // Function to post or update a job
+        function postOrUpdateJob() {
+            const jobTitle = document.getElementById('jobTitle').value;
+            const company = document.getElementById('company').value;
+            const location = document.getElementById('location').value;
+            const experience = document.getElementById('experience').value;
+            const salary = document.getElementById('salary').value;
+            const state = document.getElementById('state').value;
+            const jobId = document.getElementById('jobId').value;
+            const category = document.getElementById('category').value;
+            const noticePeriod = document.getElementById('noticePeriod').value;
+            const jobHighlights = document.getElementById('jobHighlights').value.split('\n').map(item => `<li>${item}</li>`).join('');
+            const keyResponsibilities = document.getElementById('keyResponsibilities').value.split('\n').map(item => `<li>${item}</li>`).join('');
+            const dateAdded = document.getElementById('dateAdded').value;
+            const isWalkIn = document.getElementById('walkInCheck').checked;
+
+            const logoFileInput = document.getElementById('logoFile');
+            const logoUrlInput = document.getElementById('companyLogoUrl').value;
+            let companyLogoUrl = '';
+
+            if (logoFileInput.files.length > 0) {
+                const file = logoFileInput.files[0];
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    companyLogoUrl = reader.result;
+                    saveJob(jobTitle, company, location, experience, salary, state, jobId, category, noticePeriod, jobHighlights, keyResponsibilities, dateAdded, isWalkIn, companyLogoUrl);
+                };
+                reader.readAsDataURL(file);
+            } else if (logoUrlInput) {
+                companyLogoUrl = logoUrlInput;
+                saveJob(jobTitle, company, location, experience, salary, state, jobId, category, noticePeriod, jobHighlights, keyResponsibilities, dateAdded, isWalkIn, companyLogoUrl);
+            } else {
+                saveJob(jobTitle, company, location, experience, salary, state, jobId, category, noticePeriod, jobHighlights, keyResponsibilities, dateAdded, isWalkIn, '');
+            }
+        }
+
+        // Function to save the job to localStorage
+        function saveJob(title, company, location, experience, salary, state, jobId, category, noticePeriod, highlights, responsibilities, dateAdded, walkIn, logoUrl) {
+            let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            const job = {
+                title,
+                company,
+                location,
+                experience,
+                salary,
+                state,
+                jobId,
+                category,
+                noticePeriod,
+                highlights,
+                responsibilities,
+                dateAdded,
+                walkIn,
+                logoUrl
+            };
+
+            if (currentEditingJobIndex !== null) {
+                jobs[currentEditingJobIndex] = job;
+                currentEditingJobIndex = null;
+            } else {
+                jobs.push(job);
+            }
+
+            localStorage.setItem('jobs', JSON.stringify(jobs));
+            document.getElementById('jobForm').reset();
+            alert('Job saved successfully!');
+        }
+
+        // Function to handle editing mode
+        function checkEditingMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editIndex = urlParams.get('edit');
+
+            if (editIndex !== null) {
+                currentEditingJobIndex = editIndex;
+                let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+                const job = jobs[editIndex];
+
+                document.getElementById('jobTitle').value = job.title;
+                document.getElementById('company').value = job.company;
+                document.getElementById('location').value = job.location;
+                document.getElementById('experience').value = job.experience;
+                document.getElementById('salary').value = job.salary;
+                document.getElementById('state').value = job.state;
+                document.getElementById('jobId').value = job.jobId;
+                document.getElementById('category').value = job.category;
+                document.getElementById('noticePeriod').value = job.noticePeriod;
+                document.getElementById('jobHighlights').value = job.highlights.replace(/<li>/g, '').replace(/<\/li>/g, '\n');
+                document.getElementById('keyResponsibilities').value = job.responsibilities.replace(/<li>/g, '').replace(/<\/li>/g, '\n');
+                document.getElementById('dateAdded').value = job.dateAdded;
+                document.getElementById('walkInCheck').checked = job.walkIn;
+                if (job.logoUrl.startsWith('data:image')) {
+                    document.getElementById('companyLogoUrl').value = '';
+                } else {
+                    document.getElementById('companyLogoUrl').value = job.logoUrl;
+                }
+            }
+        }
+
+        // Check if admin is logged in
+        function checkAdmin() {
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (isAdmin !== 'true') {
+                window.location.href = 'admin-login.html'; // Redirect to login if not admin
+            }
+        }
+
+        // Admin logout
+        function handleLogout() {
+            localStorage.removeItem('isAdmin');
+            window.location.href = 'admin-login.html';  // Redirect to login
+        }
+
+        // Initialize the page
+        window.onload = function() {
+            checkAdmin();  // Verify admin
+            checkEditingMode();  // Check if we are in edit mode
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center text-white">Post a Job (Admin Dashboard)</h1>
+
+        <!-- Logout Button -->
+        <div class="text-end mb-3">
+            <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <!-- Job Form -->
+        <form id="jobForm" onsubmit="event.preventDefault(); postOrUpdateJob();">
+            <div class="card p-4">
+                <div class="mb-3">
+                    <label for="jobTitle" class="form-label">1. Role (Job Title)</label>
+                    <input type="text" class="form-control" id="jobTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label for="company" class="form-label">2. Company</label>
+                    <input type="text" class="form-control" id="company" required>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">3. Category</label>
+                    <input type="text" class="form-control" id="category" required>
+                </div>
+                <div class="mb-3">
+                    <label for="jobId" class="form-label">4. Job ID</label>
+                    <input type="text" class="form-control" id="jobId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="state" class="form-label">5. State</label>
+                    <input type="text" class="form-control" id="state" required>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">6. Location</label>
+                    <input type="text" class="form-control" id="location" required>
+                </div>
+                <div class="mb-3">
+                    <label for="experience" class="form-label">7. Experience (in years)</label>
+                    <input type="number" class="form-control" id="experience" required>
+                </div>
+                <div class="mb-3">
+                    <label for="salary" class="form-label">8. Salary</label>
+                    <input type="text" class="form-control" id="salary" required>
+                </div>
+                <div class="mb-3">
+                    <label for="noticePeriod" class="form-label">9. Notice Period</label>
+                    <input type="text" class="form-control" id="noticePeriod" required>
+                </div>
+                <div class="mb-3">
+                    <label for="jobHighlights" class="form-label">10. Job Highlights</label>
+                    <textarea class="form-control" id="jobHighlights" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="keyResponsibilities" class="form-label">11. Key Responsibilities</label>
+                    <textarea class="form-control" id="keyResponsibilities" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="dateAdded" class="form-label">12. Date Added</label>
+                    <input type="date" class="form-control" id="dateAdded" required>
+                </div>
+                <!-- Option to upload company logo -->
+                <div class="mb-3">
+                    <label for="logoFile" class="form-label">Upload Company Logo</label>
+                    <input type="file" class="form-control" id="logoFile" accept="image/*">
+                </div>
+                <!-- OR -->
+                <div class="mb-3">
+                    <label for="companyLogoUrl" class="form-label">OR Enter Company Logo URL</label>
+                    <input type="text" class="form-control" id="companyLogoUrl" placeholder="Enter the URL for the company logo">
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="walkInCheck">
+                    <label class="form-check-label" for="walkInCheck">Is this a Walk-In job?</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Job</button>
+            </div>
+        </form>
+
+        <!-- Link to Manage Jobs Page -->
+        <div class="mt-5 text-center">
+            <a href="manage-jobs.html" class="btn btn-secondary">Manage Jobs</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
