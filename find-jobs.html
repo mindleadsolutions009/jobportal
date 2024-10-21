@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Jobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Ensure both the html and body take full height of the page */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Background image for the body */
+        body {
+            background-image: url('image-black.jpg'); /* Replace with your image path */
+            background-size: cover; /* Ensure the image covers the entire background */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat; /* Prevents the background image from repeating */
+            min-height: 100vh; /* Minimum height to cover the full viewport */
+            background-attachment: fixed; /* Fixes the background during scrolling */
+        }
+
+        /* Flexbox styling to align title to the left and logo to the right */
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-logo {
+            width: 50px;
+            height: 50px;
+        }
+
+        /* Additional margin for filter and job list sections */
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        /* Hidden by default, shown only for admin */
+        .admin-only {
+            display: none;
+        }
+
+        /* Card styling: black background and white text */
+        .card {
+            background-color: black;
+            color: white;
+        }
+
+        /* White text */
+        .text-white {
+            color: white !important;
+        }
+
+        /* Blue color for titles */
+        .card-title a {
+            color: blue;
+            text-decoration: none;
+        }
+
+        /* Profile Picture Section - Positioned to the top-right corner */
+        .profile-picture-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .profile-picture {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Profile Section - Initially hidden */
+        .profile-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 250px;
+            display: none; /* Hidden initially */
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center text-white">Find Jobs</h1>
+
+        <!-- Filter and All Jobs Section -->
+        <div class="filter-section d-flex justify-content-between align-items-center">
+            <h2 class="mt-5 text-white">Available Jobs</h2>
+            <div>
+                <!-- Filter Button -->
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
+                    <span>Filter</span> <i class="bi bi-funnel"></i>
+                </button>
+                <!-- All Jobs Button -->
+                <button class="btn btn-outline-secondary" onclick="loadJobs()">All Jobs</button>
+            </div>
+        </div>
+
+        <!-- Profile Picture in the top-right corner -->
+        <div class="profile-picture-container">
+            <img id="profilePictureDisplay" src="default-profile.png" alt="Profile Picture" class="profile-picture" onclick="toggleProfileSection()">
+        </div>
+
+        <!-- Profile Section (Collapsible) - Positioned in the top-right corner -->
+        <div class="profile-section" id="profileSection">
+            <h2 class="text-center">Edit Profile</h2>
+
+            <!-- Profile Picture Upload -->
+            <div class="text-center">
+                <img id="profilePicture" src="default-profile.png" alt="Profile Picture" class="profile-picture">
+                <input type="file" id="profilePicInput" class="edit-profile-picture btn btn-secondary" accept="image/*" onchange="previewProfilePicture(event)">
+            </div>
+
+            <form id="profileForm" onsubmit="event.preventDefault(); saveProfile();">
+                <div class="mb-3">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="fullName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="experience" class="form-label">Experience (Years)</label>
+                    <input type="number" class="form-control" id="experience" required>
+                </div>
+                <div class="mb-3">
+                    <label for="education" class="form-label">Education</label>
+                    <input type="text" class="form-control" id="education" required>
+                </div>
+                <div class="mb-3">
+                    <label for="skills" class="form-label">Skills</label>
+                    <input type="text" class="form-control" id="skills" required>
+                </div>
+                <div class="mb-3">
+                    <label for="languages" class="form-label">Languages Known</label>
+                    <input type="text" class="form-control" id="languages" required>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+            </form>
+        </div>
+
+        <!-- Filter Section (Collapsible) -->
+        <div class="collapse mb-3" id="filterSection">
+            <div class="card card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-control" id="role">
+                            <option value="">Select Role</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="company" class="form-label">Company</label>
+                        <select class="form-control" id="company">
+                            <option value="">Select Company</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-control" id="category">
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="state" class="form-label">State</label>
+                        <select class="form-control" id="state">
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="location" class="form-label">Location</label>
+                        <select class="form-control" id="location">
+                            <option value="">Select Location</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="experience" class="form-label">Experience</label>
+                        <select class="form-control" id="experience">
+                            <option value="">Select Experience</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="filterJobs()">Apply Filters</button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job List -->
+        <div id="jobList" class="row">
+            <!-- Jobs will be dynamically loaded here in a 2-row, 5-column grid -->
+        </div>
+    </div>
+
+    <script>
+        // Preview uploaded profile picture
+        function previewProfilePicture(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('profilePicture');
+                const displayOutput = document.getElementById('profilePictureDisplay');
+                output.src = reader.result;
+                displayOutput.src = reader.result; // Update the profile picture in the top-right corner as well
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // Save profile details to localStorage
+        function saveProfile() {
+            const profile = {
+                fullName: document.getElementById('fullName').value,
+                experience: document.getElementById('experience').value,
+                education: document.getElementById('education').value,
+                skills: document.getElementById('skills').value,
+                languages: document.getElementById('languages').value,
+                location: document.getElementById('location').value,
+                profilePicture: document.getElementById('profilePicture').src
+            };
+            localStorage.setItem('jobseekerProfile', JSON.stringify(profile));
+            alert('Profile saved successfully!');
+        }
+
+        // Load profile from localStorage and display on the page
+        function loadProfile() {
+            const profile = JSON.parse(localStorage.getItem('jobseekerProfile'));
+            if (profile) {
+                document.getElementById('fullName').value = profile.fullName;
+                document.getElementById('experience').value = profile.experience;
+                document.getElementById('education').value = profile.education;
+                document.getElementById('skills').value = profile.skills;
+                document.getElementById('languages').value = profile.languages;
+                document.getElementById('location').value = profile.location;
+                document.getElementById('profilePicture').src = profile.profilePicture;
+                document.getElementById('profilePictureDisplay').src = profile.profilePicture; // Update the profile picture in the top-right corner
+            }
+        }
+
+        // Toggle the profile section display
+        function toggleProfileSection() {
+            const profileSection = document.getElementById('profileSection');
+            profileSection.style.display = profileSection.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Load jobs (existing logic unchanged)
+        function loadJobs(jobs = null) {
+            if (!jobs) {
+                jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            }
+            const jobList = document.getElementById('jobList');
+            jobList.innerHTML = '';
+            jobs.forEach((job, index) => {
+                const walkInLabel = job.walkIn ? '<span class="badge bg-success">Walk-In</span>' : '';
+                const logoHtml = job.logoUrl ? `<img src="${job.logoUrl}" alt="Company Logo" class="job-logo">` : '';
+                const jobItem = `
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="job-header">
+                                    <h5 class="card-title">
+                                        <a href="job-details.html?jobIndex=${index}" class="text-decoration-none">${job.title}</a> ${walkInLabel}
+                                    </h5>
+                                    ${logoHtml}
+                                </div>
+                                <p class="card-text"><strong>Role:</strong> ${job.title}</p>
+                                <p class="card-text"><strong>Company:</strong> ${job.company}</p>
+                                <p class="card-text"><strong>Category:</strong> ${job.category || 'N/A'}</p>
+                                <p class="card-text"><strong>State:</strong> ${job.state}</p>
+                                <p class="card-text"><strong>Location:</strong> ${job.location}</p>
+                                <p class="card-text"><strong>Experience:</strong> ${job.experience} years</p>
+                                <p class="card-text"><strong>Salary:</strong> ${job.salary}</p>
+                                <p class="card-text"><strong>Qualification:</strong> ${job.qualification || 'N/A'}</p>
+                                <p class="card-text"><strong>JobID:</strong> ${job.jobId}</p>
+                                <p class="card-text"><strong>Notice Period:</strong> ${job.noticePeriod || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                jobList.innerHTML += jobItem;
+            });
+        }
+
+        // Populate filters and jobs on page load
+        window.onload = function () {
+            populateFilters();
+            loadJobs();
+            loadProfile();  // Load saved profile
+        };
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
