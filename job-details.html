@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Background image for the body */
+        body {
+            background-image: url('job-dtim.jpg'); /* Replace 'your-image-path.jpg' with your actual image path */
+            background-size: cover; /* Ensure the image covers the entire background */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat; /* Prevent the background from repeating */
+            height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default body margin */
+        }
+
+        /* Flexbox utility to center content both vertically and horizontally */
+        .center-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+        }
+
+        .job-logo {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* Optional: Center text in job details */
+        .text-center {
+            text-align: center;
+        }
+    </style>
+    <script>
+        // Function to extract query parameters from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to load job details
+        function loadJobDetails() {
+            // Retrieve the jobIndex from the query parameters
+            const jobIndex = getQueryParam('jobIndex');
+
+            // Retrieve jobs from localStorage
+            let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+
+            // Check if the job exists
+            if (!jobs[jobIndex]) {
+                document.getElementById('jobDetails').innerHTML = '<p class="text-danger">Job not found.</p>';
+                return;
+            }
+
+            // Get the selected job using the jobIndex
+            const job = jobs[jobIndex];
+
+            // Get the job details container
+            const jobDetailsContainer = document.getElementById('jobDetails');
+
+            // Display the full job details
+            jobDetailsContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            ${job.logoUrl ? `<img src="${job.logoUrl}" alt="Company Logo" class="job-logo mb-2">` : ''}
+                        </div>
+                        <h4 class="card-title text-center">${job.title}</h4>
+                        <p class="card-text"><strong>Role:</strong> ${job.title}</p>
+                        <p class="card-text"><strong>Company:</strong> ${job.company}</p>
+                        <p class="card-text"><strong>Category:</strong> ${job.category || 'N/A'}</p>
+                        <p class="card-text"><strong>JobID:</strong> ${job.jobId}</p>
+                        <p class="card-text"><strong>State:</strong> ${job.state}</p>
+                        <p class="card-text"><strong>Location:</strong> ${job.location}</p>
+                        <p class="card-text"><strong>Experience Required:</strong> ${job.experience} years</p>
+                        <p class="card-text"><strong>Salary:</strong> ${job.salary}</p>
+                        <p class="card-text"><strong>Qualification:</strong> ${job.qualification || 'N/A'}</p>
+                        <p class="card-text"><strong>Notice Period:</strong> ${job.noticePeriod}</p>
+                        <p class="card-text"><strong>Job Highlights:</strong></p>
+                        <ul class="bullet-list">${job.highlights}</ul>
+                        <p class="card-text"><strong>Key Responsibilities:</strong></p>
+                        <ul class="bullet-list">${job.responsibilities}</ul>
+                        <p class="card-text"><strong>Date Added:</strong> ${job.dateAdded}</p>
+                        <!-- Share and Apply buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-primary" id="applyButton">Apply Now</button>
+                            <button class="btn btn-secondary" id="shareButton">Share</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Attach event listeners to the buttons after rendering
+            document.getElementById('applyButton').addEventListener('click', function () {
+                applyForJob(jobIndex);
+            });
+
+            document.getElementById('shareButton').addEventListener('click', function () {
+                shareJob(jobIndex);
+            });
+        }
+
+        // Function to handle applying for the job
+        function applyForJob(jobIndex) {
+            // Redirect to the application form page
+            window.location.href = 'application.html?jobIndex=' + jobIndex;
+        }
+
+        // Function to handle sharing the job
+        function shareJob(jobIndex) {
+            // Retrieve jobs from localStorage
+            let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+
+            // Get the selected job
+            const job = jobs[jobIndex];
+            const jobUrl = `${window.location.origin}/job-details.html?jobIndex=${jobIndex}`;
+
+            // Check if the Share API is available
+            if (navigator.share) {
+                // Use the Share API to share the job
+                navigator.share({
+                    title: job.title,
+                    text: `Check out this job: ${job.title}\n${job.company} - ${job.location}`,
+                    url: jobUrl,
+                }).then(() => {
+                    alert('Job shared successfully!');
+                }).catch((error) => {
+                    console.error('Error sharing job:', error);
+                });
+            } else {
+                // Fallback: Copy the job URL to the clipboard
+                navigator.clipboard.writeText(jobUrl).then(() => {
+                    alert('Job URL copied to clipboard!');
+                }).catch((error) => {
+                    console.error('Error copying job URL:', error);
+                });
+            }
+        }
+
+
+
+
+
+
+
+        
+        // Load job details when the page loads
+        window.onload = loadJobDetails;
+    </script>
+</head>
+<body>
+    <div class="container center-content">
+        <div id="jobDetails">
+            <!-- Job details will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
