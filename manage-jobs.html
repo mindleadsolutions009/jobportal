@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Jobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+
+        
+        /* Flexbox styling to align title to the left and logo to the right */
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .job-logo {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+    <script>
+
+        
+        // Function to load the existing jobs into the job list
+        function loadJobs() {
+            let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            const jobList = document.getElementById('jobList');
+            jobList.innerHTML = '';
+
+            jobs.forEach((job, index) => {
+                const walkInLabel = job.walkIn ? '<span class="badge bg-success">Walk-In</span>' : '';
+                
+                // Display company logo if available
+                const logoHtml = job.logoUrl ? `<img src="${job.logoUrl}" alt="Company Logo" class="job-logo">` : '';
+
+                const jobItem = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <!-- Job header with title and logo aligned right -->
+                            <div class="job-header">
+                                <h5 class="card-title">
+                                    ${job.title} ${walkInLabel}
+                                </h5>
+                                ${logoHtml}
+                            </div>
+                            <p class="card-text"><strong>Role:</strong> ${job.title}</p>
+                            <p class="card-text"><strong>Company:</strong> ${job.company}</p>
+                            <p class="card-text"><strong>Category:</strong> ${job.category || 'N/A'}</p>
+                            <p class="card-text"><strong>JobID:</strong> ${job.jobId}</p>
+                            <p class="card-text"><strong>State:</strong> ${job.state}</p>
+                            <p class="card-text"><strong>Location:</strong> ${job.location}</p>
+                            <p class="card-text"><strong>Experience:</strong> ${job.experience} years</p>
+                            <p class="card-text"><strong>Salary:</strong> ${job.salary}</p>
+                            <p class="card-text"><strong>Qualification:</strong> ${job.qualification || 'N/A'}</p>
+                            <p class="card-text"><strong>Notice Period:</strong> ${job.noticePeriod}</p>
+                            <p class="card-text"><strong>Job Highlights:</strong></p>
+                            <ul class="bullet-list">${job.highlights}</ul>
+                            <p class="card-text"><strong>Key Responsibilities:</strong></p>
+                            <ul class="bullet-list">${job.responsibilities}</ul>
+                            <p class="card-text"><strong>Date Added:</strong> ${job.dateAdded}</p>
+                            <button class="btn btn-warning btn-sm" onclick="editJob(${index})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteJob(${index})">Delete</button>
+                        </div>
+                    </div>
+                `;
+                jobList.innerHTML += jobItem;
+            });
+        }
+
+        // Function to delete a job
+        function deleteJob(index) {
+            let jobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            jobs.splice(index, 1); // Remove the job from the array
+            localStorage.setItem('jobs', JSON.stringify(jobs));
+            loadJobs(); // Reload the job list
+            alert('Job deleted successfully!');
+        }
+
+        // Function to edit a job
+        function editJob(index) {
+            window.location.href = `post-job.html?edit=${index}`; // Redirect to post-job page for editing
+        }
+
+        // Load jobs when the page loads
+        window.onload = loadJobs;
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Manage Jobs</h1>
+
+        <!-- Job List -->
+        <h2 class="mt-5">Current Jobs</h2>
+        <div id="jobList">
+            <!-- Jobs will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
