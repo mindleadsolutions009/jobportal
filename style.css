@@ -1,0 +1,87 @@
+/* General body styling */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: #0d0d0d; /* Dark background similar to the example */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Hero section with full height */
+.hero-section {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0d0d0d;
+}
+
+.text-container {
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Main heading styles */
+.main-heading {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #ffffff;
+    letter-spacing: 1.5px;
+}
+
+/* Sub-heading styles */
+.sub-heading {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #aaaaaa; /* Light gray for subtitle */
+}
+
+/* Button section styling */
+.btn-section {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Primary and danger buttons styling */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+/* Button hover effect */
+.btn-primary:hover, .btn-danger:hover {
+    opacity: 0.8;
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 768px) {
+    .main-heading {
+        font-size: 2.5rem;
+    }
+    
+    .sub-heading {
+        font-size: 1rem;
+    }
+    
+    .btn-primary, .btn-danger {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+}
